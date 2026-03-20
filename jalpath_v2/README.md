@@ -159,6 +159,57 @@ Current test folders include:
   - `firestore.rules`
   - `storage.rules`
 
+## Deploy to Google Cloud Run
+
+This repo now includes a production-ready `Dockerfile` and `.dockerignore` for Cloud Run.
+
+### 1) Prerequisites
+
+- Google Cloud project with billing enabled
+- `gcloud` CLI installed and authenticated
+- Required APIs enabled: Cloud Run, Artifact Registry, Cloud Build
+
+### 2) Set project variables
+
+```bash
+gcloud config set project YOUR_PROJECT_ID
+gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com
+```
+
+### 3) Build and push container image
+
+Run from `jalpath_v2/`:
+
+```bash
+gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/jalpath-v2
+```
+
+### 4) Deploy service
+
+```bash
+gcloud run deploy jalpath-v2 \
+  --image gcr.io/YOUR_PROJECT_ID/jalpath-v2 \
+  --platform managed \
+  --region asia-south1 \
+  --allow-unauthenticated \
+  --set-env-vars NEXT_PUBLIC_FIREBASE_API_KEY=...,NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...,NEXT_PUBLIC_FIREBASE_PROJECT_ID=...,NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...,NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...,NEXT_PUBLIC_FIREBASE_APP_ID=... \
+  --set-secrets GEMINI_API_KEY=GEMINI_API_KEY:latest
+```
+
+Recommended: keep `GEMINI_API_KEY` in Secret Manager and inject it with `--set-secrets`.
+
+### 5) Verify deployment
+
+```bash
+gcloud run services describe jalpath-v2 --region asia-south1 --format='value(status.url)'
+```
+
+Open the returned URL and test:
+
+- Main app: `/`
+- Simulation page: `/flood-sim`
+- API health check (manual): `POST /api/analyze`
+
 ## Safety and Scope Disclaimer
 
 JalPath provides AI-assisted emergency guidance for rapid triage and awareness. It is not a substitute for official emergency response services. In critical conditions, contact local emergency authorities immediately.
