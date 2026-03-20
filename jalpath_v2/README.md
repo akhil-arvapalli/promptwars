@@ -1,6 +1,6 @@
 # JalPath v2
 
-AI-assisted flood emergency support platform built with Next.js, Gemini, Firebase, and a GIS-driven 3D flood simulation workspace.
+AI-assisted flood emergency support platform built with Next.js, Gemini, and a GIS-driven 3D flood simulation workspace.
 
 JalPath helps users quickly understand flood risk from image + text input, then provides structured escape guidance. It also includes a dedicated map-based simulation mode for selecting an Area of Interest (AOI), loading terrain/building data, and visualizing flood progression.
 
@@ -9,7 +9,7 @@ JalPath helps users quickly understand flood risk from image + text input, then 
 - Accepts optional on-ground photo evidence and/or a text description of a flood scenario.
 - Calls Gemini through a server API route and returns structured emergency guidance.
 - Displays urgency level, estimated water depth, risk factors, step-by-step escape actions, and do-not-do warnings.
-- Logs analysis records to Firestore.
+- Displays urgency level, estimated water depth, risk factors, step-by-step escape actions, and do-not-do warnings.
 - Provides a separate `/flood-sim` experience with:
   - AOI selection on a map
   - Terrain elevation fetch (Open-Meteo)
@@ -20,7 +20,7 @@ JalPath helps users quickly understand flood risk from image + text input, then 
 
 - Framework: Next.js 14 (App Router) + React 18 + TypeScript
 - AI: Google Gemini (`@google/generative-ai`)
-- Data/Storage: Firebase Firestore + Firebase Storage
+- AI: Google Gemini (`@google/generative-ai`)
 - UI/Animation: Tailwind CSS + Framer Motion + Lucide icons
 - 3D/GIS: Three.js (`@react-three/fiber`, `@react-three/drei`), Leaflet
 - Validation: Zod
@@ -35,7 +35,7 @@ JalPath helps users quickly understand flood risk from image + text input, then 
 3. Server route validates payload with Zod.
 4. Server calls Gemini model and expects strict JSON output.
 5. UI renders structured analysis cards and urgency badges.
-6. Result is persisted to Firestore (best effort, non-fatal on log failure).
+5. UI renders structured analysis cards and urgency badges.
 
 ### 2) Flood Simulation Flow
 
@@ -97,7 +97,7 @@ Note: Gemini output is expected as raw JSON and parsed server-side.
 - Node.js 18+
 - npm 9+
 - Gemini API key
-- Firebase project with Firestore and Storage enabled
+- Gemini API key
 
 ## Environment Variables
 
@@ -107,13 +107,8 @@ Create `.env.local` using `.env.local.example`:
 # Gemini
 GEMINI_API_KEY=your_gemini_api_key_here
 
-# Firebase (public client identifiers)
-NEXT_PUBLIC_FIREBASE_API_KEY=...
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
-NEXT_PUBLIC_FIREBASE_APP_ID=...
+# Gemini
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ## Local Development
@@ -155,9 +150,7 @@ Current test folders include:
 
 - Can be deployed on Vercel (recommended for Next.js) or any Node-compatible host.
 - Ensure all environment variables are configured in the deployment platform.
-- Firebase security rules files are included:
-  - `firestore.rules`
-  - `storage.rules`
+- Ensure all environment variables are configured in the deployment platform.
 
 ## Deploy to Google Cloud Run
 
@@ -172,13 +165,6 @@ Run from `jalpath_v2/`:
   -ProjectId "YOUR_PROJECT_ID" `
   -Region "asia-south1" `
   -Service "jalpath-v2" `
-  -Image "jalpath-v2" `
-  -FirebaseApiKey "..." `
-  -FirebaseAuthDomain "..." `
-  -FirebaseProjectId "..." `
-  -FirebaseStorageBucket "..." `
-  -FirebaseMessagingSenderId "..." `
-  -FirebaseAppId "..." `
   -GeminiSecretName "GEMINI_API_KEY" `
   -GeminiSecretVersion "latest"
 ```
@@ -187,8 +173,8 @@ What this script does:
 
 - sets the active GCP project
 - enables required APIs
-- builds and pushes the container image with Cloud Build
-- deploys to Cloud Run with Firebase public env vars and Gemini secret injection
+- builds from source via Cloud Build
+- deploys to Cloud Run with Gemini secret injection
 - prints the live Cloud Run URL
 
 ### 1) Prerequisites
@@ -204,29 +190,22 @@ gcloud config set project YOUR_PROJECT_ID
 gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com
 ```
 
-### 3) Build and push container image
+### 3) Deploy directly from source
 
 Run from `jalpath_v2/`:
 
 ```bash
-gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/jalpath-v2
-```
-
-### 4) Deploy service
-
-```bash
 gcloud run deploy jalpath-v2 \
-  --image gcr.io/YOUR_PROJECT_ID/jalpath-v2 \
+  --source . \
   --platform managed \
   --region asia-south1 \
   --allow-unauthenticated \
-  --set-env-vars NEXT_PUBLIC_FIREBASE_API_KEY=...,NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...,NEXT_PUBLIC_FIREBASE_PROJECT_ID=...,NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...,NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...,NEXT_PUBLIC_FIREBASE_APP_ID=... \
   --set-secrets GEMINI_API_KEY=GEMINI_API_KEY:latest
 ```
 
 Recommended: keep `GEMINI_API_KEY` in Secret Manager and inject it with `--set-secrets`.
 
-### 5) Verify deployment
+### 4) Verify deployment
 
 ```bash
 gcloud run services describe jalpath-v2 --region asia-south1 --format='value(status.url)'
