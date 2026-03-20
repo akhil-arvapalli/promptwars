@@ -33,3 +33,10 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Remove GSD framework artifacts from repo
+.gsd/
+.agent/
+gsd-template/
+GSD-STYLE.md
+PROJECT_RULES.md
