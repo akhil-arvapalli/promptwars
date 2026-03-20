@@ -59,7 +59,7 @@ $envVars = @(
     "NEXT_PUBLIC_FIREBASE_APP_ID=$FirebaseAppId"
 ) -join ","
 
-$secretRef = "GEMINI_API_KEY=$GeminiSecretName:$GeminiSecretVersion"
+$secretRef = "GEMINI_API_KEY=${GeminiSecretName}:${GeminiSecretVersion}"
 
 Write-Host "Deploying Cloud Run service: $Service ($Region)" -ForegroundColor Cyan
 gcloud run deploy $Service `
