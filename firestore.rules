@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /flood_reports/{reportId} {
+      allow create: if request.resource.data.keys().hasOnly([
+                         'uid','reporterEmail','imageUrl','audioUrl','transcript',
+                         'textDescription','geminiResult','createdAt'
+                       ])
+                    && request.resource.data.uid is string
+                    && request.resource.data.reporterEmail is string
+                    && request.resource.data.uid.matches('^guest_[a-z0-9]{8}$');
+      allow read: if true;   // Community feed â€” public read
+      allow update, delete: if false;
+    }
+  }
+}

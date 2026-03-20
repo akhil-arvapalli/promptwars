@@ -1,0 +1,10 @@
+{
+  "name": "JalPath",
+  "short_name": "JalPath",
+  "description": "Flood escape guidance app",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020817",
+  "theme_color": "#0c4a6e",
+  "icons": []
+}
