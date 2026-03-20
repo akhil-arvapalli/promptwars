@@ -163,6 +163,34 @@ Current test folders include:
 
 This repo now includes a production-ready `Dockerfile` and `.dockerignore` for Cloud Run.
 
+### Quick Deploy (PowerShell)
+
+Run from `jalpath_v2/`:
+
+```powershell
+./scripts/deploy-cloud-run.ps1 `
+  -ProjectId "YOUR_PROJECT_ID" `
+  -Region "asia-south1" `
+  -Service "jalpath-v2" `
+  -Image "jalpath-v2" `
+  -FirebaseApiKey "..." `
+  -FirebaseAuthDomain "..." `
+  -FirebaseProjectId "..." `
+  -FirebaseStorageBucket "..." `
+  -FirebaseMessagingSenderId "..." `
+  -FirebaseAppId "..." `
+  -GeminiSecretName "GEMINI_API_KEY" `
+  -GeminiSecretVersion "latest"
+```
+
+What this script does:
+
+- sets the active GCP project
+- enables required APIs
+- builds and pushes the container image with Cloud Build
+- deploys to Cloud Run with Firebase public env vars and Gemini secret injection
+- prints the live Cloud Run URL
+
 ### 1) Prerequisites
 
 - Google Cloud project with billing enabled
